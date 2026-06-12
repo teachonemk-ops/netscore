@@ -45,6 +45,16 @@ function setOfflineBadge() {
   }
 }
 
+// Register PWA Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => console.log('Service Worker registered:', reg.scope))
+      .catch(err => console.error('Service Worker registration failed:', err));
+  });
+}
+
+
 // -------------------------------------------------------------
 // 2. Core Match State Model
 // -------------------------------------------------------------
@@ -433,6 +443,31 @@ function openOverModal(overNum) {
   document.getElementById("over-modal").classList.add("active");
 }
 
+// Fullscreen Red Flash, Screen Shake, and Haptic Vibration on Wicket
+function triggerWicketEffect() {
+  const flash = document.getElementById("wicket-flash-overlay");
+  const container = document.querySelector(".app-container");
+  
+  if (flash) {
+    flash.classList.add("flash-active");
+    setTimeout(() => {
+      flash.classList.remove("flash-active");
+    }, 1000);
+  }
+  
+  if (container) {
+    container.classList.add("shake-active");
+    setTimeout(() => {
+      container.classList.remove("shake-active");
+    }, 500);
+  }
+  
+  if (navigator.vibrate) {
+    navigator.vibrate([200, 100, 200]);
+  }
+}
+
+
 // Undo Button
 document.getElementById("btn-undo").addEventListener("click", () => {
   if (!isScorer) return;
@@ -506,6 +541,10 @@ function addDelivery(type, runs) {
   };
 
   innings.deliveries.push(delivery);
+
+  if (type === "wicket") {
+    triggerWicketEffect();
+  }
 
   // Update max deliveries reached
   if (innings.deliveries.length > (innings.maxDeliveriesCount || 0)) {
@@ -585,9 +624,14 @@ function applyEdit(type, runs) {
   if (delivery) {
     // Check if new values match original
     const isBackToOriginal = (type === delivery.originalType && runs === delivery.originalRuns);
+    const wasWicket = delivery.type === "wicket";
 
     delivery.type = type;
     delivery.runs = runs;
+
+    if (type === "wicket" && !wasWicket) {
+      triggerWicketEffect();
+    }
     
     if (isBackToOriginal) {
       delivery.isEdited = false;
@@ -625,6 +669,15 @@ function renderScorecard() {
   document.getElementById("display-team-a").textContent = battingTeamName;
   document.getElementById("display-team-b").textContent = bowlingTeamName;
   document.getElementById("display-match-code").textContent = matchState.matchCode || "----";
+
+  const headerShare = document.getElementById("header-btn-share");
+  if (headerShare) {
+    if (matchState.status !== "setup") {
+      headerShare.style.display = "inline-flex";
+    } else {
+      headerShare.style.display = "none";
+    }
+  }
 
   // Score
   document.getElementById("display-runs").textContent = innings.runs;
@@ -838,6 +891,116 @@ function renderRecentMatches() {
 }
 
 // -------------------------------------------------------------
+// Coin Toss Decider Logic
+// -------------------------------------------------------------
+let coinRotation = 0;
+const btnToss = document.getElementById("btn-toss");
+const headerBtnToss = document.getElementById("header-btn-toss");
+const btnCloseToss = document.getElementById("btn-close-toss");
+
+if (headerBtnToss) {
+  headerBtnToss.addEventListener("click", () => {
+    document.getElementById("toss-result").textContent = "Flip to choose ends";
+    const coin = document.getElementById("coin");
+    if (coin) coin.style.transform = "rotateY(0deg)";
+    coinRotation = 0;
+    document.getElementById("toss-modal").classList.add("active");
+  });
+}
+
+if (btnCloseToss) {
+  btnCloseToss.addEventListener("click", () => {
+    document.getElementById("toss-modal").classList.remove("active");
+  });
+}
+
+if (btnToss) {
+  btnToss.addEventListener("click", () => {
+    const coin = document.getElementById("coin");
+    const status = document.getElementById("toss-result");
+
+    btnToss.disabled = true;
+    status.textContent = "Flipping...";
+    
+    const isHeads = Math.random() < 0.5;
+    const extraSpins = 1800; // 5 full spins
+    const targetAngle = isHeads ? 0 : 180;
+    
+    // Increment rotation relative to current angle
+    const currentAngle = coinRotation % 360;
+    coinRotation += extraSpins + (targetAngle - currentAngle);
+    
+    coin.style.transform = `rotateY(${coinRotation}deg)`;
+
+    setTimeout(() => {
+      status.textContent = isHeads ? "Result: HEADS (A wins toss)" : "Result: TAILS (B wins toss)";
+      btnToss.disabled = false;
+    }, 2000); // matching CSS transition speed of 2s
+  });
+}
+
+// -------------------------------------------------------------
+// Share Live Match & QR Code Logic
+// -------------------------------------------------------------
+function openShareModal() {
+  if (!matchState.matchCode) return;
+  const shareUrl = `${window.location.origin}${window.location.pathname}?join=${matchState.matchCode}`;
+  document.getElementById("share-link-input").value = shareUrl;
+  
+  const qrContainer = document.getElementById("qr-code-container");
+  if (qrContainer) {
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(shareUrl)}`;
+    qrContainer.innerHTML = `<img src="${qrUrl}" alt="Match QR Code">`;
+  }
+  
+  document.getElementById("qr-modal").classList.add("active");
+}
+
+const headerBtnShare = document.getElementById("header-btn-share");
+if (headerBtnShare) {
+  headerBtnShare.addEventListener("click", openShareModal);
+}
+
+const btnShareMatch = document.getElementById("btn-share-match");
+if (btnShareMatch) {
+  btnShareMatch.addEventListener("click", openShareModal);
+}
+
+const btnCloseQr = document.getElementById("btn-close-qr");
+if (btnCloseQr) {
+  btnCloseQr.addEventListener("click", () => {
+    document.getElementById("qr-modal").classList.remove("active");
+  });
+}
+
+const btnCopyShareLink = document.getElementById("btn-copy-share-link");
+if (btnCopyShareLink) {
+  btnCopyShareLink.addEventListener("click", () => {
+    const input = document.getElementById("share-link-input");
+    input.select();
+    input.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(input.value)
+      .then(() => {
+        btnCopyShareLink.textContent = "Copied!";
+        setTimeout(() => {
+          btnCopyShareLink.textContent = "Copy";
+        }, 2000);
+      })
+      .catch(err => console.error("Clipboard copy failed:", err));
+  });
+}
+
+// Auto-join from URL parameter
+window.addEventListener("load", () => {
+  const params = new URLSearchParams(window.location.search);
+  const joinCode = params.get("join");
+  if (joinCode && joinCode.length === 4) {
+    joinMatch(joinCode);
+  }
+});
+
+// -------------------------------------------------------------
 // 10. Initialization
 // -------------------------------------------------------------
 renderRecentMatches();
+

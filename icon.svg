@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0a0f" />
+      <stop offset="50%" stop-color="#18112d" />
+      <stop offset="100%" stop-color="#0d0d14" />
+    </linearGradient>
+
+    <!-- Neon Glow Gradient for Ball -->
+    <linearGradient id="ball-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff0055" />
+      <stop offset="100%" stop-color="#8b5cf6" />
+    </linearGradient>
+
+    <!-- Metallic Gradient for Bat -->
+    <linearGradient id="bat-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#8b5cf6" />
+    </linearGradient>
+
+    <!-- Glow Filter -->
+    <filter id="neon-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="16" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- App Icon Background -->
+  <rect width="512" height="512" rx="112" fill="url(#bg-grad)" stroke="#2d1d4d" stroke-width="6"/>
+
+  <!-- Decorative Glow Ring -->
+  <circle cx="256" cy="256" r="210" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-dasharray="10 15" opacity="0.3" />
+
+  <!-- Cricket Bat (Stylized) -->
+  <g transform="rotate(-45 256 256)">
+    <!-- Handle -->
+    <rect x="244" y="60" width="24" height="130" rx="12" fill="url(#bat-grad)" opacity="0.9" />
+    <rect x="244" y="90" width="24" height="15" fill="#0d0d14" opacity="0.4" />
+    <rect x="244" y="120" width="24" height="15" fill="#0d0d14" opacity="0.4" />
+    <!-- Blade -->
+    <path d="M236 190 H276 V390 C276 405 264 415 256 415 C248 415 236 405 236 390 Z" fill="url(#bat-grad)" />
+    <!-- Grip texture lines -->
+    <line x1="244" y1="180" x2="268" y2="180" stroke="#0d0d14" stroke-width="2" opacity="0.3" />
+  </g>
+
+  <!-- Cricket Ball (Glowing Neon) -->
+  <circle cx="330" cy="330" r="48" fill="url(#ball-grad)" filter="url(#neon-glow)" />
+  <!-- Seam of the cricket ball -->
+  <path d="M296 330 C316 312 344 312 364 330" fill="none" stroke="#ffffff" stroke-width="4" stroke-dasharray="4 4" opacity="0.8" />
+  <path d="M296 330 C316 348 344 348 364 330" fill="none" stroke="#ffffff" stroke-width="4" stroke-dasharray="4 4" opacity="0.8" />
+</svg>

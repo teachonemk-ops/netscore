@@ -8,6 +8,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#8b5cf6">
   <!-- Firebase Compat SDKs (CDN) -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -66,6 +69,7 @@
       flex-direction: column;
       gap: 20px;
       min-height: 90vh;
+      transition: transform 0.1s ease;
     }
 
     /* Header */
@@ -94,6 +98,37 @@
       background: linear-gradient(90deg, #fff, var(--accent-color));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 6px;
+    }
+
+    .header-action-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      width: 30px;
+      height: 30px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all var(--transition-speed) ease;
+    }
+
+    .header-action-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: var(--accent-color);
+      transform: scale(1.08);
+    }
+
+    .header-action-btn:active {
+      transform: scale(0.95);
     }
 
     .sync-badge {
@@ -306,11 +341,33 @@
     .match-code-display {
       font-size: 12px;
       color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
     }
 
     .match-code-display strong {
       color: var(--warning-color);
       letter-spacing: 0.5px;
+    }
+
+    .btn-share {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--card-border);
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all var(--transition-speed) ease;
+    }
+
+    .btn-share:hover {
+      background: var(--accent-color);
+      color: #fff;
+      border-color: var(--accent-color);
     }
 
     /* Big Score Area */
@@ -566,6 +623,86 @@
       box-shadow: 0 0 8px rgba(0, 255, 255, 0.25);
     }
 
+    /* Coin Toss Widget inside Modal */
+    .coin-toss-section {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-top: 8px;
+    }
+
+    .widget-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: block;
+      margin-bottom: 12px;
+    }
+
+    .coin-toss-row {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .coin-wrapper {
+      perspective: 1000px;
+      width: 80px;
+      height: 80px;
+    }
+
+    .coin {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 2s cubic-bezier(0.25, 0.1, 0.25, 1.15);
+    }
+
+    .coin-side {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      backface-visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: 800;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    }
+
+    .coin-heads {
+      background: linear-gradient(135deg, hsl(45, 100%, 65%), hsl(35, 100%, 45%));
+      color: hsl(45, 100%, 15%);
+      border: 4px solid hsl(45, 100%, 75%);
+    }
+
+    .coin-tails {
+      background: linear-gradient(135deg, hsl(0, 0%, 85%), hsl(0, 0%, 55%));
+      color: hsl(0, 0%, 15%);
+      border: 4px solid hsl(0, 0%, 95%);
+      transform: rotateY(180deg);
+    }
+
+    .toss-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .toss-status {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--warning-color);
+      min-height: 20px;
+    }
+
     /* Recent matches list */
     .recent-list {
       display: flex;
@@ -602,7 +739,7 @@
 
     /* Modals */
     .modal {
-      display: none; /* Hidden by default */
+      display: none;
       position: fixed;
       z-index: 100;
       left: 0;
@@ -768,7 +905,7 @@
       border: 1px solid var(--card-border);
       border-radius: 10px;
       padding: 2px;
-      height: 50px; /* same height as modal-btn */
+      height: 50px;
     }
 
     .stepper-btn {
@@ -844,6 +981,11 @@
       animation: popIn 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
     }
 
+    @keyframes popIn {
+      from { transform: scale(0.5); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
     .btn-tick {
       width: 60px;
       height: 60px;
@@ -898,6 +1040,108 @@
       from { opacity: 0; transform: translateY(-2px); }
       to { opacity: 0.85; transform: translateY(0); }
     }
+
+    /* QR & Share Modal Specifics */
+    .qr-modal-content {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      padding: 24px;
+    }
+
+    .modal-subtext {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .qr-container {
+      background: #ffffff;
+      padding: 16px;
+      border-radius: 16px;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      width: 182px;
+      height: 182px;
+      margin: 8px 0;
+    }
+
+    .qr-container img {
+      width: 150px;
+      height: 150px;
+      display: block;
+    }
+
+    .share-link-box {
+      display: flex;
+      width: 100%;
+      gap: 8px;
+    }
+
+    .share-link-box input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .share-link-box .btn {
+      padding: 10px 16px;
+      font-size: 14px;
+      border-radius: 10px;
+    }
+
+    /* Wicket Animation & Shake Effect */
+    .wicket-flash {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(239, 68, 68, 0.9);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      text-shadow: 0 0 30px rgba(255, 255, 255, 0.6);
+      transition: opacity 0.2s ease;
+    }
+
+    .wicket-flash.flash-active {
+      animation: wicketFlashAnim 1s ease-out forwards;
+    }
+
+    @keyframes wicketFlashAnim {
+      0% { opacity: 0; transform: scale(0.8); }
+      15% { opacity: 1; transform: scale(1.1); }
+      30% { opacity: 1; transform: scale(1); }
+      80% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(1.2); }
+    }
+
+    .app-container.shake-active {
+      animation: screenShakeAnim 0.5s ease-in-out;
+    }
+
+    @keyframes screenShakeAnim {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      10%, 30%, 50%, 70%, 90% { transform: translate(-4px, 2px) rotate(-1deg); }
+      20%, 40%, 60%, 80% { transform: translate(4px, -2px) rotate(1deg); }
+    }
   </style>
 </head>
 <body>
@@ -907,6 +1151,10 @@
       <div class="logo-area">
         <span class="icon">🏏</span>
         <h1>NetScores</h1>
+        <div class="header-actions">
+          <button id="header-btn-toss" class="header-action-btn" title="Coin Toss Decider">🪙</button>
+          <button id="header-btn-share" class="header-action-btn" title="Share Match / QR Code" style="display: none;">🔗</button>
+        </div>
       </div>
       <div id="sync-status" class="sync-badge offline">Offline Mode</div>
     </header>
@@ -969,6 +1217,7 @@
           </div>
           <div class="match-code-display">
             Match Code: <strong id="display-match-code">----</strong>
+            <button id="btn-share-match" class="btn-share" title="Share Match / Get QR Code">🔗 Share</button>
           </div>
         </div>
 
@@ -1089,9 +1338,49 @@
         <button id="btn-close-over-modal" class="btn-tick">✓</button>
       </div>
     </div>
+
+    <!-- QR Code Modal -->
+    <div id="qr-modal" class="modal">
+      <div class="modal-content glass-card qr-modal-content">
+        <h3>Share Live Match</h3>
+        <p class="modal-subtext">Let friends scan the code or use the link below to watch in real-time:</p>
+        <div id="qr-code-container" class="qr-container">
+          <!-- QR image loaded dynamically -->
+        </div>
+        <div class="share-link-box">
+          <input type="text" id="share-link-input" readonly>
+          <button id="btn-copy-share-link" class="btn btn-primary">Copy</button>
+        </div>
+        <button id="btn-close-qr" class="btn btn-secondary">Close</button>
+      </div>
+    </div>
+
+    <!-- Coin Toss Modal -->
+    <div id="toss-modal" class="modal">
+      <div class="modal-content glass-card qr-modal-content">
+        <h3>Coin Toss Decider</h3>
+        <p class="modal-subtext">Flip the coin to decide ends or innings:</p>
+        <div class="coin-wrapper" style="margin: 16px 0;">
+          <div id="coin" class="coin">
+            <div class="coin-side coin-heads">H</div>
+            <div class="coin-side coin-tails">T</div>
+          </div>
+        </div>
+        <div id="toss-result" class="toss-status" style="margin-bottom: 16px;">Flip to choose ends</div>
+        <div class="share-link-box" style="justify-content: center; gap: 12px;">
+          <button type="button" id="btn-toss" class="btn btn-primary">Flip Coin</button>
+          <button id="btn-close-toss" class="btn btn-secondary">Close</button>
+        </div>
+      </div>
+    </div>
   </div>
 
+  <!-- Wicket Flash Overlay -->
+  <div id="wicket-flash-overlay" class="wicket-flash">WICKET!</div>
+
   <script>
+    // NetScores - Cricket Scorer JavaScript Logic
+
     // -------------------------------------------------------------
     // 1. Firebase Initialization & Fail-Safe Offline Mode
     // -------------------------------------------------------------
@@ -1112,7 +1401,6 @@
     };
 
     try {
-      // If Firestore CDN loaded successfully and config is initialized
       if (typeof firebase !== 'undefined') {
         firebase.initializeApp(firebaseConfig);
         db = firebase.firestore();
@@ -1137,6 +1425,15 @@
       }
     }
 
+    // Register PWA Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('Service Worker registered:', reg.scope))
+          .catch(err => console.error('Service Worker registration failed:', err));
+      });
+    }
+
     // -------------------------------------------------------------
     // 2. Core Match State Model
     // -------------------------------------------------------------
@@ -1145,17 +1442,16 @@
       teamA: "Team A",
       teamB: "Team B",
       oversLimit: 5,
-      currentInnings: 1, // 1 = First innings, 2 = Second innings
-      status: "setup", // 'setup', 'live', 'innings_ended', 'match_completed'
-      // Innings Data
+      currentInnings: 1,
+      status: "setup",
       innings1: {
         battingTeam: "teamA",
         runs: 0,
         wickets: 0,
-        balls: 0, // legal balls
+        balls: 0,
         wides: 0,
         noballs: 0,
-        deliveries: [], // Array of delivery objects
+        deliveries: [],
         maxDeliveriesCount: 0
       },
       innings2: {
@@ -1171,7 +1467,6 @@
       }
     };
 
-    // Local storage backup for recent matches
     let recentMatches = JSON.parse(localStorage.getItem("netscores_recent") || "[]");
 
     // -------------------------------------------------------------
@@ -1205,7 +1500,6 @@
       });
     }
 
-    // Enable/Disable tabs based on match status
     function updateTabStates() {
       const btnScorecard = document.getElementById("btn-tab-scorecard");
       const btnHistory = document.getElementById("btn-tab-history");
@@ -1230,7 +1524,6 @@
       matchCode = Math.floor(1000 + Math.random() * 9000).toString();
       isScorer = true;
 
-      // Initialize State
       matchState = {
         matchCode: matchCode,
         teamA: teamA,
@@ -1261,7 +1554,6 @@
         }
       };
 
-      // Show Scorer Controls
       document.getElementById("scorer-controls").style.display = "grid";
       document.getElementById("history-desc").textContent = "Click any ball below to edit its outcome.";
 
@@ -1277,7 +1569,6 @@
         alert("Please enter a valid 4-digit Match Code.");
         return;
       }
-
       joinMatch(code);
     });
 
@@ -1285,12 +1576,10 @@
       matchCode = code;
       isScorer = false;
 
-      // Hide scoring buttons on spectator screen
       document.getElementById("scorer-controls").style.display = "none";
       document.getElementById("history-desc").textContent = "Viewing mode (read-only live sync).";
 
       if (isOfflineMode) {
-        // If offline, check if match is in recent matches list
         const found = recentMatches.find(m => m.matchCode === code);
         if (found) {
           matchState = found;
@@ -1301,7 +1590,6 @@
           alert("Match not found locally. Connect to internet or verify the code.");
         }
       } else {
-        // Online Firebase listener
         db.collection("matches").doc(code).onSnapshot(doc => {
           if (doc.exists) {
             matchState = doc.data();
@@ -1325,10 +1613,9 @@
     // 5. Database & Local Storage Sync
     // -------------------------------------------------------------
     function saveAndSyncMatch() {
-      // Update recent local matches list
       recentMatches = recentMatches.filter(m => m.matchCode !== matchState.matchCode);
       recentMatches.unshift(matchState);
-      if (recentMatches.length > 5) recentMatches.pop(); // Keep last 5
+      if (recentMatches.length > 5) recentMatches.pop();
       localStorage.setItem("netscores_recent", JSON.stringify(recentMatches));
 
       renderRecentMatches();
@@ -1342,7 +1629,6 @@
           badge.textContent = "Scorer (Live)";
           badge.className = "sync-badge live-host";
 
-          // Sync to Firestore
           db.collection("matches").doc(matchState.matchCode).set(matchState)
             .catch(err => {
               console.error("Firestore write failed:", err);
@@ -1353,7 +1639,7 @@
     }
 
     // -------------------------------------------------------------
-    // 6. Recalculation Core (The Engine)
+    // 6. Recalculation Core
     // -------------------------------------------------------------
     function getActiveInnings() {
       return matchState.currentInnings === 1 ? matchState.innings1 : matchState.innings2;
@@ -1363,7 +1649,6 @@
       const innings = getActiveInnings();
       const deliveries = innings.deliveries;
 
-      // Reset counters
       innings.runs = 0;
       innings.wickets = 0;
       innings.balls = 0;
@@ -1374,7 +1659,6 @@
       let currentOverIndex = 0;
 
       deliveries.forEach((del) => {
-        // Recalculate ball index for visual timeline
         if (del.type === "normal" || del.type === "wicket") {
           legalBallInOver++;
           if (legalBallInOver > 6) {
@@ -1385,32 +1669,28 @@
           del.ballNum = legalBallInOver;
           innings.balls++;
         } else {
-          // Extras (Wide / No Ball) - do not count towards legal balls
           del.overNum = currentOverIndex;
-          del.ballNum = legalBallInOver; // keeps current ball count
+          del.ballNum = legalBallInOver;
         }
 
-        // Apply runs and wickets
         if (del.type === "normal") {
           innings.runs += del.runs;
         } else if (del.type === "wide") {
-          innings.runs += (1 + del.runs); // 1 wide penalty + additional runs
+          innings.runs += (1 + del.runs);
           innings.wides += (1 + del.runs);
         } else if (del.type === "noball") {
-          innings.runs += (1 + del.runs); // 1 noball penalty + bat runs
+          innings.runs += (1 + del.runs);
           innings.noballs += (1 + del.runs);
         } else if (del.type === "wicket") {
           innings.wickets++;
         }
       });
 
-      // Check for End of Innings
       const maxBalls = matchState.oversLimit * 6;
       if (innings.wickets >= 10 || innings.balls >= maxBalls) {
         handleInningsEnd();
       }
 
-      // Second Innings Specific Target Rules
       if (matchState.currentInnings === 2) {
         const target = matchState.innings2.target;
         if (innings.runs >= target) {
@@ -1430,7 +1710,6 @@
       }
     }
 
-    // Helper to convert balls to over string (e.g. 8 balls -> 1.2 overs)
     function formatOvers(ballsCount) {
       const overs = Math.floor(ballsCount / 6);
       const remaining = ballsCount % 6;
@@ -1440,9 +1719,8 @@
     // -------------------------------------------------------------
     // 7. Scorer Button Handlers
     // -------------------------------------------------------------
-    let pendingExtraType = ""; // 'wide' or 'noball'
+    let pendingExtraType = "";
 
-    // Normal run buttons (0, 1, 2, 3, 4, 6)
     document.querySelectorAll(".score-btn[data-val]").forEach(btn => {
       btn.addEventListener("click", () => {
         if (!isScorer || isMatchOver()) return;
@@ -1451,13 +1729,11 @@
       });
     });
 
-    // Wicket Button
     document.getElementById("btn-wicket").addEventListener("click", () => {
       if (!isScorer || isMatchOver()) return;
       addDelivery("wicket", 0);
     });
 
-    // Wide / No Ball opens modal
     document.getElementById("btn-wide").addEventListener("click", () => {
       if (!isScorer || isMatchOver()) return;
       openExtrasModal("wide");
@@ -1473,13 +1749,11 @@
     function openExtrasModal(type) {
       pendingExtraType = type;
       document.getElementById("modal-title").textContent = type === "wide" ? "Wide Ball Extras" : "No Ball Extras";
-      // Reset stepper to 1
       stepperVal = 1;
       updateStepperUI();
       document.getElementById("extras-modal").classList.add("active");
     }
 
-    // Modal extra runs buttons (0, 4, 6)
     document.querySelectorAll(".modal-btn").forEach(btn => {
       btn.addEventListener("click", () => {
         const extraRuns = parseInt(btn.getAttribute("data-extra"));
@@ -1488,7 +1762,6 @@
       });
     });
 
-    // Stepper Handlers for 1, 2, 3 runs
     document.getElementById("btn-stepper-minus").addEventListener("click", () => {
       if (stepperVal > 1) {
         stepperVal--;
@@ -1525,6 +1798,30 @@
       document.getElementById("over-modal").classList.add("active");
     }
 
+    // Fullscreen Red Flash, Screen Shake, and Haptic Vibration on Wicket
+    function triggerWicketEffect() {
+      const flash = document.getElementById("wicket-flash-overlay");
+      const container = document.querySelector(".app-container");
+      
+      if (flash) {
+        flash.classList.add("flash-active");
+        setTimeout(() => {
+          flash.classList.remove("flash-active");
+        }, 1000);
+      }
+      
+      if (container) {
+        container.classList.add("shake-active");
+        setTimeout(() => {
+          container.classList.remove("shake-active");
+        }, 500);
+      }
+      
+      if (navigator.vibrate) {
+        navigator.vibrate([200, 100, 200]);
+      }
+    }
+
     // Undo Button
     document.getElementById("btn-undo").addEventListener("click", () => {
       if (!isScorer) return;
@@ -1532,9 +1829,8 @@
       if (innings.deliveries.length === 0) return;
 
       const undone = innings.deliveries.pop();
-      innings.lastUndoneDelivery = undone; // track the last undone ball to check for replacements
+      innings.lastUndoneDelivery = undone;
       
-      // If match was completed, bring it back to active live state
       if (matchState.status === "match_completed") {
         matchState.status = "live";
       } else if (matchState.status === "innings1_ended") {
@@ -1566,7 +1862,6 @@
       const innings = getActiveInnings();
       const oldLegalBalls = innings.balls;
       
-      // Undo Loophole Protection: If we're entering a delivery and current count is less than the max we've recorded, it's flagged as a replacement
       const currentLength = innings.deliveries.length;
       let isReplaced = false;
       let undoneType = null;
@@ -1574,7 +1869,6 @@
       
       if (innings.maxDeliveriesCount && currentLength < innings.maxDeliveriesCount) {
         const undone = innings.lastUndoneDelivery;
-        // If they re-enter the exact same thing, it's not a cheat/manipulation
         const isSameAsUndone = (undone && undone.type === type && undone.runs === runs);
         if (!isSameAsUndone) {
           isReplaced = true;
@@ -1599,14 +1893,16 @@
 
       innings.deliveries.push(delivery);
 
-      // Update max deliveries reached
+      if (type === "wicket") {
+        triggerWicketEffect();
+      }
+
       if (innings.deliveries.length > (innings.maxDeliveriesCount || 0)) {
         innings.maxDeliveriesCount = innings.deliveries.length;
       }
 
       recalculateMatchStats();
       
-      // Check if an over was just completed (exclude innings ends, which have separate switch alerts)
       const newLegalBalls = innings.balls;
       if (newLegalBalls > 0 && newLegalBalls % 6 === 0 && newLegalBalls !== oldLegalBalls && matchState.status === "live") {
         const overCompleted = newLegalBalls / 6;
@@ -1620,7 +1916,6 @@
       renderHistory();
     }
 
-    // Helper to format delivery text for audit logs (e.g. "2" or "Wd+1")
     function getDeliveryText(type, runs) {
       if (type === "normal") return runs.toString();
       if (type === "wide") return `Wd${runs > 0 ? `+${runs}` : ""}`;
@@ -1630,12 +1925,12 @@
     }
 
     // -------------------------------------------------------------
-    // 8. History Editing Logic (Spectator highlights change)
+    // 8. History Editing Logic
     // -------------------------------------------------------------
     let editingDeliveryId = null;
 
     function openEditModal(deliveryId) {
-      if (!isScorer) return; // Only scorer can edit
+      if (!isScorer) return;
       editingDeliveryId = deliveryId;
       const innings = getActiveInnings();
       const delivery = innings.deliveries.find(d => d.id === deliveryId);
@@ -1661,7 +1956,6 @@
         let runs = parseInt(btn.getAttribute("data-val") || "0");
 
         if (type === "wide" || type === "noball") {
-          // Ask how many runs scored off wide/noball
           const res = prompt("Enter additional runs off this extra (0, 1, 2, 3, 4, 6):", "0");
           runs = parseInt(res) || 0;
         }
@@ -1675,11 +1969,15 @@
       const delivery = innings.deliveries.find(d => d.id === editingDeliveryId);
 
       if (delivery) {
-        // Check if new values match original
         const isBackToOriginal = (type === delivery.originalType && runs === delivery.originalRuns);
+        const wasWicket = delivery.type === "wicket";
 
         delivery.type = type;
         delivery.runs = runs;
+
+        if (type === "wicket" && !wasWicket) {
+          triggerWicketEffect();
+        }
         
         if (isBackToOriginal) {
           delivery.isEdited = false;
@@ -1713,26 +2011,30 @@
         ? (matchState.innings1.battingTeam === "teamA" ? matchState.teamB : matchState.teamA)
         : (matchState.innings2.battingTeam === "teamA" ? matchState.teamB : matchState.teamA);
 
-      // Update names
       document.getElementById("display-team-a").textContent = battingTeamName;
       document.getElementById("display-team-b").textContent = bowlingTeamName;
       document.getElementById("display-match-code").textContent = matchState.matchCode || "----";
 
-      // Score
+      const headerShare = document.getElementById("header-btn-share");
+      if (headerShare) {
+        if (matchState.status !== "setup") {
+          headerShare.style.display = "inline-flex";
+        } else {
+          headerShare.style.display = "none";
+        }
+      }
+
       document.getElementById("display-runs").textContent = innings.runs;
       document.getElementById("display-wickets").textContent = innings.wickets;
       document.getElementById("display-overs").textContent = formatOvers(innings.balls);
 
-      // Run Rates
       const oversBowled = innings.balls / 6;
       const crr = oversBowled > 0 ? (innings.runs / oversBowled) : 0;
       document.getElementById("display-crr").textContent = crr.toFixed(2);
 
-      // Extras breakdown
       document.getElementById("display-extras").textContent = innings.wides + innings.noballs;
       document.getElementById("display-extras-breakdown").textContent = `${innings.wides}w, ${innings.noballs}nb`;
 
-      // Innings 2 layout (Target and Required Run Rate)
       const reqRateContainer = document.getElementById("req-rate-container");
       const targetMsg = document.getElementById("display-target-msg");
 
@@ -1756,7 +2058,6 @@
         targetMsg.style.display = "none";
       }
 
-      // Innings Switch Overlay Control
       const inningSwitchCard = document.getElementById("inning-switch-card");
       const scorerControls = document.getElementById("scorer-controls");
 
@@ -1775,7 +2076,6 @@
             document.getElementById("inning-over-text").textContent = `Match Completed! ${battingTeamName} won by ${10 - innings.wickets} wickets.`;
           }
         }
-        // Disable Start 2nd innings button
         document.getElementById("btn-start-second-innings").style.display = "none";
       } else {
         inningSwitchCard.style.display = "none";
@@ -1796,7 +2096,6 @@
         return;
       }
 
-      // Group deliveries by over index
       const overs = {};
       innings.deliveries.forEach(del => {
         if (!overs[del.overNum]) {
@@ -1805,7 +2104,6 @@
         overs[del.overNum].push(del);
       });
 
-      // Render group by group
       Object.keys(overs).sort((a,b) => b - a).forEach(overIdx => {
         const overDels = overs[overIdx];
         const overRow = document.createElement("div");
@@ -1814,7 +2112,6 @@
         const overHeader = document.createElement("div");
         overHeader.className = "over-header";
         
-        // Calculate runs in this specific over
         let overRuns = 0;
         overDels.forEach(d => {
           if (d.type === 'normal') overRuns += d.runs;
@@ -1837,7 +2134,6 @@
           const bubble = document.createElement("div");
           bubble.className = "ball-bubble";
           
-          // Setup styling classes
           if (del.type === "normal") {
             bubble.textContent = del.runs;
             bubble.classList.add(`runs-${del.runs}`);
@@ -1852,7 +2148,6 @@
             bubble.classList.add("wicket");
           }
 
-          // Highlights for edited/replaced deliveries
           if (del.isEdited) {
             bubble.classList.add("edited-delivery");
             bubble.title = "Outcome edited retrospectively";
@@ -1861,14 +2156,12 @@
             bubble.title = "Ball replaced after Undo";
           }
 
-          // Action click on ball
           if (isScorer) {
             bubble.addEventListener("click", () => openEditModal(del.id));
           }
 
           ballContainer.appendChild(bubble);
 
-          // Append trace description under bubble
           if (del.isEdited) {
             const trace = document.createElement("div");
             trace.className = "ball-edit-trace edited";
@@ -1902,7 +2195,6 @@
         const item = document.createElement("div");
         item.className = "recent-item";
         
-        // Status text
         let statusLabel = "";
         if (match.status === "match_completed") {
           statusLabel = "Completed";
@@ -1921,13 +2213,120 @@
         `;
 
         item.addEventListener("click", () => {
-          // Join match
           joinMatch(match.matchCode);
         });
 
         container.appendChild(item);
       });
     }
+
+    // -------------------------------------------------------------
+    // Coin Toss Decider Logic
+    // -------------------------------------------------------------
+    let coinRotation = 0;
+    const btnToss = document.getElementById("btn-toss");
+    const headerBtnToss = document.getElementById("header-btn-toss");
+    const btnCloseToss = document.getElementById("btn-close-toss");
+
+    if (headerBtnToss) {
+      headerBtnToss.addEventListener("click", () => {
+        document.getElementById("toss-result").textContent = "Flip to choose ends";
+        const coin = document.getElementById("coin");
+        if (coin) coin.style.transform = "rotateY(0deg)";
+        coinRotation = 0;
+        document.getElementById("toss-modal").classList.add("active");
+      });
+    }
+
+    if (btnCloseToss) {
+      btnCloseToss.addEventListener("click", () => {
+        document.getElementById("toss-modal").classList.remove("active");
+      });
+    }
+
+    if (btnToss) {
+      btnToss.addEventListener("click", () => {
+        const coin = document.getElementById("coin");
+        const status = document.getElementById("toss-result");
+
+        btnToss.disabled = true;
+        status.textContent = "Flipping...";
+        
+        const isHeads = Math.random() < 0.5;
+        const extraSpins = 1800; // 5 full spins
+        const targetAngle = isHeads ? 0 : 180;
+        
+        const currentAngle = coinRotation % 360;
+        coinRotation += extraSpins + (targetAngle - currentAngle);
+        
+        coin.style.transform = `rotateY(${coinRotation}deg)`;
+
+        setTimeout(() => {
+          status.textContent = isHeads ? "Result: HEADS (A wins toss)" : "Result: TAILS (B wins toss)";
+          btnToss.disabled = false;
+        }, 2000);
+      });
+    }
+
+    // -------------------------------------------------------------
+    // Share Live Match & QR Code Logic
+    // -------------------------------------------------------------
+    function openShareModal() {
+      if (!matchState.matchCode) return;
+      const shareUrl = `${window.location.origin}${window.location.pathname}?join=${matchState.matchCode}`;
+      document.getElementById("share-link-input").value = shareUrl;
+      
+      const qrContainer = document.getElementById("qr-code-container");
+      if (qrContainer) {
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(shareUrl)}`;
+        qrContainer.innerHTML = `<img src="${qrUrl}" alt="Match QR Code">`;
+      }
+      
+      document.getElementById("qr-modal").classList.add("active");
+    }
+
+    const headerBtnShare = document.getElementById("header-btn-share");
+    if (headerBtnShare) {
+      headerBtnShare.addEventListener("click", openShareModal);
+    }
+
+    const btnShareMatch = document.getElementById("btn-share-match");
+    if (btnShareMatch) {
+      btnShareMatch.addEventListener("click", openShareModal);
+    }
+
+    const btnCloseQr = document.getElementById("btn-close-qr");
+    if (btnCloseQr) {
+      btnCloseQr.addEventListener("click", () => {
+        document.getElementById("qr-modal").classList.remove("active");
+      });
+    }
+
+    const btnCopyShareLink = document.getElementById("btn-copy-share-link");
+    if (btnCopyShareLink) {
+      btnCopyShareLink.addEventListener("click", () => {
+        const input = document.getElementById("share-link-input");
+        input.select();
+        input.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(input.value)
+          .then(() => {
+            btnCopyShareLink.textContent = "Copied!";
+            setTimeout(() => {
+              btnCopyShareLink.textContent = "Copy";
+            }, 2000);
+          })
+          .catch(err => console.error("Clipboard copy failed:", err));
+      });
+    }
+
+    // Auto-join from URL parameter
+    window.addEventListener("load", () => {
+      const params = new URLSearchParams(window.location.search);
+      const joinCode = params.get("join");
+      if (joinCode && joinCode.length === 4) {
+        joinMatch(joinCode);
+      }
+    });
 
     // -------------------------------------------------------------
     // 10. Initialization

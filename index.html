@@ -10,6 +10,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
   <!-- Stylesheet -->
   <link rel="stylesheet" href="style.css">
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#8b5cf6">
   <!-- Firebase Compat SDKs (CDN) -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -21,6 +24,10 @@
       <div class="logo-area">
         <span class="icon">🏏</span>
         <h1>NetScores</h1>
+        <div class="header-actions">
+          <button id="header-btn-toss" class="header-action-btn" title="Coin Toss Decider">🪙</button>
+          <button id="header-btn-share" class="header-action-btn" title="Share Match / QR Code" style="display: none;">🔗</button>
+        </div>
       </div>
       <div id="sync-status" class="sync-badge offline">Offline Mode</div>
     </header>
@@ -50,6 +57,8 @@
             <label for="input-overs">Overs Limit</label>
             <input type="number" id="input-overs" value="5" min="1" max="50">
           </div>
+
+          
           <button id="btn-create-match" class="btn btn-primary">Create Live Match</button>
         </div>
 
@@ -83,6 +92,7 @@
           </div>
           <div class="match-code-display">
             Match Code: <strong id="display-match-code">----</strong>
+            <button id="btn-share-match" class="btn-share" title="Share Match / Get QR Code">🔗 Share</button>
           </div>
         </div>
 
@@ -203,7 +213,45 @@
         <button id="btn-close-over-modal" class="btn-tick">✓</button>
       </div>
     </div>
+
+    <!-- QR Code Modal -->
+    <div id="qr-modal" class="modal">
+      <div class="modal-content glass-card qr-modal-content">
+        <h3>Share Live Match</h3>
+        <p class="modal-subtext">Let friends scan the code or use the link below to watch in real-time:</p>
+        <div id="qr-code-container" class="qr-container">
+          <!-- QR image loaded dynamically -->
+        </div>
+        <div class="share-link-box">
+          <input type="text" id="share-link-input" readonly>
+          <button id="btn-copy-share-link" class="btn btn-primary">Copy</button>
+        </div>
+        <button id="btn-close-qr" class="btn btn-secondary">Close</button>
+      </div>
+    </div>
+
+    <!-- Coin Toss Modal -->
+    <div id="toss-modal" class="modal">
+      <div class="modal-content glass-card qr-modal-content">
+        <h3>Coin Toss Decider</h3>
+        <p class="modal-subtext">Flip the coin to decide ends or innings:</p>
+        <div class="coin-wrapper" style="margin: 16px 0;">
+          <div id="coin" class="coin">
+            <div class="coin-side coin-heads">H</div>
+            <div class="coin-side coin-tails">T</div>
+          </div>
+        </div>
+        <div id="toss-result" class="toss-status" style="margin-bottom: 16px;">Flip to choose ends</div>
+        <div class="share-link-box" style="justify-content: center; gap: 12px;">
+          <button type="button" id="btn-toss" class="btn btn-primary">Flip Coin</button>
+          <button id="btn-close-toss" class="btn btn-secondary">Close</button>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <!-- Wicket Flash Overlay -->
+  <div id="wicket-flash-overlay" class="wicket-flash">WICKET!</div>
 
   <!-- App JavaScript -->
   <script src="app.js"></script>
