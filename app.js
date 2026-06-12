@@ -439,7 +439,8 @@ document.getElementById("btn-undo").addEventListener("click", () => {
   const innings = getActiveInnings();
   if (innings.deliveries.length === 0) return;
 
-  innings.deliveries.pop();
+  const undone = innings.deliveries.pop();
+  innings.lastUndoneDelivery = undone; // track the last undone ball to check for replacements
   
   // If match was completed, bring it back to active live state
   if (matchState.status === "match_completed") {
@@ -476,8 +477,20 @@ function addDelivery(type, runs) {
   // Undo Loophole Protection: If we're entering a delivery and current count is less than the max we've recorded, it's flagged as a replacement
   const currentLength = innings.deliveries.length;
   let isReplaced = false;
+  let undoneType = null;
+  let undoneRuns = null;
+  
   if (innings.maxDeliveriesCount && currentLength < innings.maxDeliveriesCount) {
-    isReplaced = true;
+    const undone = innings.lastUndoneDelivery;
+    // If they re-enter the exact same thing, it's not a cheat/manipulation
+    const isSameAsUndone = (undone && undone.type === type && undone.runs === runs);
+    if (!isSameAsUndone) {
+      isReplaced = true;
+      if (undone) {
+        undoneType = undone.type;
+        undoneRuns = undone.runs;
+      }
+    }
   }
 
   const delivery = {
@@ -485,7 +498,11 @@ function addDelivery(type, runs) {
     type: type,
     runs: runs,
     isEdited: false,
-    isReplaced: isReplaced
+    isReplaced: isReplaced,
+    originalType: type,
+    originalRuns: runs,
+    undoneType: undoneType,
+    undoneRuns: undoneRuns
   };
 
   innings.deliveries.push(delivery);
@@ -511,6 +528,15 @@ function addDelivery(type, runs) {
   renderHistory();
 }
 
+// Helper to format delivery text for audit logs (e.g. "2" or "Wd+1")
+function getDeliveryText(type, runs) {
+  if (type === "normal") return runs.toString();
+  if (type === "wide") return `Wd${runs > 0 ? `+${runs}` : ""}`;
+  if (type === "noball") return `Nb${runs > 0 ? `+${runs}` : ""}`;
+  if (type === "wicket") return "Wkt";
+  return "";
+}
+
 // -------------------------------------------------------------
 // 8. History Editing Logic (Spectator highlights change)
 // -------------------------------------------------------------
@@ -525,7 +551,15 @@ function openEditModal(deliveryId) {
   if (!delivery) return;
 
   const labelText = `Over ${formatOvers(delivery.overNum * 6 + (delivery.ballNum - 1))}`;
-  document.getElementById("edit-ball-label").textContent = labelText;
+  const originalDesc = getDeliveryText(delivery.originalType, delivery.originalRuns);
+  const currentDesc = getDeliveryText(delivery.type, delivery.runs);
+  
+  document.getElementById("edit-ball-label").innerHTML = `
+    ${labelText}<br>
+    <span style="font-size:12px; font-weight:400; color:var(--text-secondary);">
+      Original: <strong>${originalDesc}</strong> (Current: <strong>${currentDesc}</strong>)
+    </span>
+  `;
   document.getElementById("edit-modal").classList.add("active");
 }
 
@@ -549,10 +583,17 @@ function applyEdit(type, runs) {
   const delivery = innings.deliveries.find(d => d.id === editingDeliveryId);
 
   if (delivery) {
-    // Mark as edited
+    // Check if new values match original
+    const isBackToOriginal = (type === delivery.originalType && runs === delivery.originalRuns);
+
     delivery.type = type;
     delivery.runs = runs;
-    delivery.isEdited = true;
+    
+    if (isBackToOriginal) {
+      delivery.isEdited = false;
+    } else {
+      delivery.isEdited = true;
+    }
 
     recalculateMatchStats();
     saveAndSyncMatch();
@@ -698,6 +739,9 @@ function renderHistory() {
     ballsContainer.className = "over-balls";
 
     overDels.forEach(del => {
+      const ballContainer = document.createElement("div");
+      ballContainer.className = "ball-container";
+
       const bubble = document.createElement("div");
       bubble.className = "ball-bubble";
       
@@ -730,7 +774,22 @@ function renderHistory() {
         bubble.addEventListener("click", () => openEditModal(del.id));
       }
 
-      ballsContainer.appendChild(bubble);
+      ballContainer.appendChild(bubble);
+
+      // Append trace description under bubble
+      if (del.isEdited) {
+        const trace = document.createElement("div");
+        trace.className = "ball-edit-trace edited";
+        trace.textContent = `${getDeliveryText(del.originalType, del.originalRuns)}→${getDeliveryText(del.type, del.runs)}`;
+        ballContainer.appendChild(trace);
+      } else if (del.isReplaced) {
+        const trace = document.createElement("div");
+        trace.className = "ball-edit-trace replaced";
+        trace.textContent = `${getDeliveryText(del.undoneType, del.undoneRuns)}→${getDeliveryText(del.type, del.runs)}`;
+        ballContainer.appendChild(trace);
+      }
+
+      ballsContainer.appendChild(ballContainer);
     });
 
     overRow.appendChild(ballsContainer);
