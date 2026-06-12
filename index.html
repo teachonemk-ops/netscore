@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NetScores</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+  <!-- Firebase Compat SDKs (CDN) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-area">
+        <span class="icon">🏏</span>
+        <h1>NetScores</h1>
+      </div>
+      <div id="sync-status" class="sync-badge offline">Offline Mode</div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="tab-navigation">
+      <button class="tab-btn active" data-tab="tab-setup">Match Setup</button>
+      <button class="tab-btn" data-tab="tab-scorecard" id="btn-tab-scorecard" disabled>Scorecard</button>
+      <button class="tab-btn" data-tab="tab-history" id="btn-tab-history" disabled>History</button>
+    </nav>
+
+    <!-- Main Screens -->
+    <main class="app-main">
+      <!-- Tab 1: Setup -->
+      <section id="tab-setup" class="tab-content active">
+        <div class="card glass-card">
+          <h2>Start a New Match</h2>
+          <div class="input-group">
+            <label for="input-team-a">Team A (Batting First)</label>
+            <input type="text" id="input-team-a" value="Team A" placeholder="Enter name">
+          </div>
+          <div class="input-group">
+            <label for="input-team-b">Team B (Bowling First)</label>
+            <input type="text" id="input-team-b" value="Team B" placeholder="Enter name">
+          </div>
+          <div class="input-group">
+            <label for="input-overs">Overs Limit</label>
+            <input type="number" id="input-overs" value="5" min="1" max="50">
+          </div>
+          <button id="btn-create-match" class="btn btn-primary">Create Live Match</button>
+        </div>
+
+        <div class="divider"><span>OR</span></div>
+
+        <div class="card glass-card">
+          <h2>Join as Spectator</h2>
+          <p class="card-desc">Track a friend's match live using their Match Code.</p>
+          <div class="input-group">
+            <label for="input-match-code">Match Code (4 Digits)</label>
+            <input type="text" id="input-match-code" placeholder="e.g. 5829" maxlength="4">
+          </div>
+          <button id="btn-join-match" class="btn btn-secondary">Join Live Match</button>
+        </div>
+
+        <div id="recent-matches-container" class="card glass-card">
+          <h2>Recent Matches</h2>
+          <div id="recent-matches-list" class="recent-list">
+            <!-- Dynamically populated -->
+            <p class="empty-msg">No active or past matches found.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab 2: Scorecard -->
+      <section id="tab-scorecard" class="tab-content">
+        <!-- Live Header Info -->
+        <div class="match-info-card card glass-card">
+          <div class="match-title">
+            <span id="display-team-a">Team A</span> <span class="vs">vs</span> <span id="display-team-b">Team B</span>
+          </div>
+          <div class="match-code-display">
+            Match Code: <strong id="display-match-code">----</strong>
+          </div>
+        </div>
+
+        <!-- Big Score Display -->
+        <div class="score-display-card card glass-card">
+          <div class="main-score">
+            <span id="display-runs">0</span>/<span id="display-wickets">0</span>
+          </div>
+          <div class="sub-stats">
+            <div class="stat-item">
+              <span class="label">Overs</span>
+              <span class="value" id="display-overs">0.0</span>
+            </div>
+            <div class="stat-item">
+              <span class="label">CRR</span>
+              <span class="value" id="display-crr">0.00</span>
+            </div>
+            <div class="stat-item" id="req-rate-container" style="display: none;">
+              <span class="label">RRR</span>
+              <span class="value" id="display-rrr">0.00</span>
+            </div>
+          </div>
+          <div class="target-message" id="display-target-msg" style="display: none;">
+            Need 51 runs off 30 balls
+          </div>
+          <div class="extras-line">
+            Extras: <span id="display-extras">0</span> (<span id="display-extras-breakdown">0w, 0nb</span>)
+          </div>
+        </div>
+
+        <!-- Buttons Panel (Scorer Only) -->
+        <div id="scorer-controls" class="controls-grid card glass-card">
+          <button class="score-btn dot" data-val="0">0</button>
+          <button class="score-btn" data-val="1">1</button>
+          <button class="score-btn" data-val="2">2</button>
+          <button class="score-btn" data-val="3">3</button>
+          <button class="score-btn" data-val="4">4</button>
+          <button class="score-btn" data-val="6">6</button>
+          <button class="score-btn wide-btn" id="btn-wide">W</button>
+          <button class="score-btn noball-btn" id="btn-noball">N</button>
+          <button class="score-btn wicket-btn" id="btn-wicket">Wkt</button>
+          <button class="score-btn undo-btn" id="btn-undo">Undo</button>
+        </div>
+
+        <div class="inning-switch-panel" id="inning-switch-card" style="display: none;">
+          <div class="card glass-card">
+            <h3>Innings Over!</h3>
+            <p id="inning-over-text">Team A completed their innings.</p>
+            <button id="btn-start-second-innings" class="btn btn-primary">Start Second Innings</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab 3: History Log -->
+      <section id="tab-history" class="tab-content">
+        <div class="card glass-card">
+          <h2>Delivery History</h2>
+          <p class="card-desc" id="history-desc">Click any ball below to edit its outcome (Scorer only).</p>
+          <div id="history-overs-list" class="overs-list">
+            <!-- Populated dynamically: grouped by over -->
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Wide/No-Ball Popup Modal -->
+    <div id="extras-modal" class="modal">
+      <div class="modal-content glass-card">
+        <h3 id="modal-title">Wide Delivery</h3>
+        <p>Enter additional runs:</p>
+        
+        <div class="extras-layout-container">
+          <div class="extras-row-layout">
+            <!-- Runs Buttons -->
+            <button class="modal-btn" data-extra="0">0</button>
+            <button class="modal-btn" data-extra="4">4</button>
+            <button class="modal-btn" data-extra="6">6</button>
+            
+            <!-- Compact Stepper (1, 2, 3) -->
+            <div class="compact-stepper">
+              <button id="btn-stepper-minus" class="stepper-btn">−</button>
+              <button id="btn-confirm-stepper" class="stepper-value-btn">1</button>
+              <button id="btn-stepper-plus" class="stepper-btn">+</button>
+            </div>
+          </div>
+        </div>
+        
+        <button id="btn-close-modal" class="btn btn-secondary">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Edit Ball Modal -->
+    <div id="edit-modal" class="modal">
+      <div class="modal-content glass-card">
+        <h3>Edit Delivery</h3>
+        <p>Change outcome for <strong id="edit-ball-label">Over 0, Ball 0</strong>:</p>
+        <div class="edit-options-grid">
+          <button class="edit-btn" data-type="normal" data-val="0">Dot (0)</button>
+          <button class="edit-btn" data-type="normal" data-val="1">1 Run</button>
+          <button class="edit-btn" data-type="normal" data-val="2">2 Runs</button>
+          <button class="edit-btn" data-type="normal" data-val="3">3 Runs</button>
+          <button class="edit-btn" data-type="normal" data-val="4">4 Runs</button>
+          <button class="edit-btn" data-type="normal" data-val="6">6 Runs</button>
+          <button class="edit-btn" data-type="wide" id="btn-edit-wide">Wide (+Extras)</button>
+          <button class="edit-btn" data-type="noball" id="btn-edit-noball">No Ball (+Extras)</button>
+          <button class="edit-btn edit-wicket" data-type="wicket">Wicket (Out)</button>
+        </div>
+        <button id="btn-close-edit" class="btn btn-secondary">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Over Complete Modal -->
+    <div id="over-modal" class="modal">
+      <div class="modal-content glass-card over-modal-content">
+        <div class="over-icon-circle">✓</div>
+        <h3>Over Complete!</h3>
+        <p id="over-modal-text">Over 1 is complete.</p>
+        <button id="btn-close-over-modal" class="btn-tick">✓</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- App JavaScript -->
+  <script src="app.js"></script>
+</body>
+</html>
