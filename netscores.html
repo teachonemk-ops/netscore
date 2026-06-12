@@ -1142,6 +1142,119 @@
       10%, 30%, 50%, 70%, 90% { transform: translate(-4px, 2px) rotate(-1deg); }
       20%, 40%, 60%, 80% { transform: translate(4px, -2px) rotate(1deg); }
     }
+
+    /* Mobile Responsiveness Improvements */
+    @media (max-width: 480px) {
+      body {
+        padding: 8px;
+      }
+
+      .app-container {
+        padding: 16px;
+        border-radius: 20px;
+        gap: 16px;
+        min-height: calc(100vh - 16px);
+      }
+
+      .app-header {
+        gap: 8px;
+      }
+
+      .logo-area h1 {
+        font-size: 20px;
+      }
+
+      .logo-area .icon {
+        font-size: 20px;
+      }
+
+      .header-actions {
+        gap: 4px;
+        margin-left: 2px;
+      }
+
+      .header-action-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 13px;
+      }
+
+      .sync-badge {
+        font-size: 10px;
+        padding: 3px 8px;
+      }
+
+      .main-score {
+        font-size: clamp(38px, 12vw, 52px);
+      }
+
+      .sub-stats {
+        gap: 20px;
+      }
+
+      .stat-item .value {
+        font-size: 16px;
+      }
+
+      .controls-grid {
+        gap: 8px;
+      }
+
+      .score-btn {
+        height: 52px;
+        font-size: 16px;
+        border-radius: 10px;
+      }
+
+      /* Compact extras row adjustment to prevent overlap */
+      .extras-row-layout {
+        gap: 6px;
+      }
+      
+      .extras-row-layout > .modal-btn:nth-child(1) {
+        font-size: 16px !important;
+      }
+      
+      .compact-stepper {
+        height: 50px;
+        padding: 1px;
+      }
+
+      .stepper-btn {
+        width: 20px;
+        height: 20px;
+        font-size: 14px;
+      }
+
+      .stepper-value-btn {
+        font-size: 14px;
+      }
+
+      .edit-options-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+
+      .edit-btn {
+        font-size: 11px;
+        height: 46px;
+      }
+
+      .modal-content {
+        padding: 16px;
+      }
+      
+      .qr-container {
+        width: 152px;
+        height: 152px;
+        padding: 12px;
+      }
+      
+      .qr-container img {
+        width: 128px;
+        height: 128px;
+      }
+    }
   </style>
 </head>
 <body>
